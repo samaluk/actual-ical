@@ -12,7 +12,7 @@ docker run -d -p 3000:3000 \
   -e ACTUAL_SERVER=actual.example.com \
   -e ACTUAL_MAIN_PASSWORD=mainpassword \
   -e ACTUAL_SYNC_ID=syncid \
-  ghcr.io/mnatheusvellone/actual-ical
+  ghcr.io/matheusvellone/actual-ical
 ```
 
 Or with docker-compose
@@ -20,7 +20,7 @@ Or with docker-compose
 ```yaml
 services:
   actual-ical:
-    image: ghcr.io/mnatheusvellone/actual-ical
+    image: ghcr.io/matheusvellone/actual-ical
     ports:
       - 3000:3000
     environment:
