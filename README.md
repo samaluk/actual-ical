@@ -41,7 +41,7 @@ All configuration is done through environment variables.
 |ACTUAL_MAIN_PASSWORD|The password to use when connecting to the Actual API|true||
 |ACTUAL_SYNC_ID|The sync ID to use when connecting to the Actual API|true||
 |ACTUAL_SYNC_PASSWORD|The sync password to use when connecting to the Actual API|false||
-|ACTUAL_PATH|The path to use when connecting to the Actual API|false|actual-local|
+|ACTUAL_PATH|The path to use when connecting to the Actual API|false|.actual-cache|
 |TZ|The timezone to use on ical data|false|UTC|
 |PORT|The port to listen on|false|3000|
 |LOCALE|The locale to use when formatting amounts|false|en-US|

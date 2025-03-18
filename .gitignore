@@ -1,4 +1,4 @@
 node_modules
-actual-local
+.actual-cache
 dist
 .env

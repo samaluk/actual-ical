@@ -4,19 +4,28 @@ import { RRule } from 'rrule'
 import { DateTime } from 'luxon'
 import { BaseConditionEntity, ScheduleEntity } from '@actual-app/api/@types/loot-core/types/models'
 import { formatCurrency } from './helpers/number'
+import { existsSync, mkdirSync } from 'node:fs'
 
 const {
   ACTUAL_SERVER,
   ACTUAL_MAIN_PASSWORD,
   ACTUAL_SYNC_ID,
   ACTUAL_SYNC_PASSWORD,
-  ACTUAL_PATH = 'actual-local',
+  ACTUAL_PATH = '.actual-cache',
   TZ = 'UTC',
 } = process.env
 
+if (!ACTUAL_SERVER || !ACTUAL_MAIN_PASSWORD || !ACTUAL_SYNC_ID) {
+  throw new Error('Missing ACTUAL_SERVER, ACTUAL_MAIN_PASSWORD or ACTUAL_SYNC_ID')
+}
+
 const getSchedules = async () => {
+  if (!existsSync(ACTUAL_PATH)) {
+    console.log('Creating directory:', ACTUAL_PATH)
+    mkdirSync(ACTUAL_PATH)
+  }
+
   await actualApi.init({
-    // Budget data will be cached locally here, in subdirectories for each file.
     dataDir: ACTUAL_PATH,
     serverURL: ACTUAL_SERVER,
     password: ACTUAL_MAIN_PASSWORD,
