@@ -1,0 +1,4 @@
+node_modules
+actual-local
+dist
+.env
