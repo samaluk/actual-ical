@@ -19,6 +19,13 @@ if (!ACTUAL_SERVER || !ACTUAL_MAIN_PASSWORD || !ACTUAL_SYNC_ID) {
   throw new Error('Missing ACTUAL_SERVER, ACTUAL_MAIN_PASSWORD or ACTUAL_SYNC_ID')
 }
 
+// Actual SDK throws unhandled exceptions on downloadBudget if the SyncID is wrong, which breaks the app
+// This should be fixed on Actual SDK side, but for now we can just ignore unhandled exceptions
+// This may hide other issues, but it's better than breaking the app
+process.on('uncaughtException', (error) => {
+  console.error('Unhandled exception', error)
+})
+
 const getSchedules = async () => {
   if (!existsSync(ACTUAL_PATH)) {
     console.log('Creating directory:', ACTUAL_PATH)
