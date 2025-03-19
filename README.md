@@ -6,6 +6,12 @@ A simple application to expose [Actual](https://github.com/actualbudget/actual) 
   <img src="_images/homepage_example.png" />
 </p>
 
+## Features
+
+- Currency display
+- Respect schedule weekend configuration
+- Realtime updates
+
 ## Usage
 
 Just run the docker image
