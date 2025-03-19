@@ -46,6 +46,7 @@ const getSchedules = async () => {
   const query = actualApi.q('schedules')
     .filter({
       completed: false,
+      tombstone: false,
     })
     .select(['*'])
 
@@ -153,7 +154,11 @@ export const generateIcal = async () => {
         return Math.ceil(nextDateDiff / 365)
       }
 
-      return recurringData.endOccurrences
+      if (recurringData.endMode === 'after_n_occurrences') {
+        return recurringData.endOccurrences
+      }
+
+      return
     }
 
     logger.debug({
@@ -184,13 +189,37 @@ export const generateIcal = async () => {
 
     logger.debug(`Generating events for ${schedule.name}. ${rule.count()} events`)
 
+    const moveOnWeekend = (date: Date) => {
+      const dateTime = DateTime.fromJSDate(date)
+
+      if (!recurringData.skipWeekend) {
+        return dateTime
+      }
+
+      if (dateTime.weekday !== 6 && dateTime.weekday !== 7) {
+        return dateTime
+      }
+
+      if (recurringData.weekendSolveMode === 'after') {
+        const daysToMove = dateTime.weekday === 6 ? 2 : 1
+        return dateTime.plus({ days: daysToMove })
+      }
+
+      if (recurringData.weekendSolveMode === 'before') {
+        const daysToMove = dateTime.weekday === 6 ? -1 : -2
+        return dateTime.plus({ days: daysToMove })
+      }
+
+      throw new Error('Invalid weekendSolveMode')
+    }
+
     return rule.all()
       .filter((date) => {
         return DateTime.fromJSDate(date) >= nextDate
       })
       .map((date) => {
         return calendar.createEvent({
-          start: date,
+          start: moveOnWeekend(date).toJSDate(),
           summary: `${schedule.name} (${formatAmount()})`,
           allDay: true,
           timezone: TZ,
