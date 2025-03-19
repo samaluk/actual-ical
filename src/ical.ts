@@ -154,7 +154,11 @@ export const generateIcal = async () => {
         return Math.ceil(nextDateDiff / 365)
       }
 
-      return recurringData.endOccurrences
+      if (recurringData.endMode === 'after_n_occurrences') {
+        return recurringData.endOccurrences
+      }
+
+      return
     }
 
     logger.debug({
