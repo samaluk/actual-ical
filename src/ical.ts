@@ -46,6 +46,7 @@ const getSchedules = async () => {
   const query = actualApi.q('schedules')
     .filter({
       completed: false,
+      tombstone: false,
     })
     .select(['*'])
 
