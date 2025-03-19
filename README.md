@@ -1,5 +1,4 @@
 # actual-ical
----
 
 A simple application to expose [Actual](https://github.com/actualbudget/actual) Scheduled Transactions in iCal format.
 
@@ -47,8 +46,9 @@ All configuration is done through environment variables.
 |ACTUAL_MAIN_PASSWORD|The password to use when connecting to the Actual API|true||
 |ACTUAL_SYNC_ID|The sync ID to use when connecting to the Actual API. Find this ID in Settings > Advanced Settings > Sync ID|true||
 |ACTUAL_SYNC_PASSWORD|The sync password|false||
-|ACTUAL_PATH|The path to store Actual cache data. The container must have write access to this path.|false|.actual-cache|
+|ACTUAL_PATH|The path to store Actual cache data. The container must have write access to this path.|false|`.actual-cache`|
 |TZ|The timezone to use on ical data|false|UTC|
 |PORT|The port to listen on|false|3000|
 |LOCALE|The locale to use when formatting amounts|false|en-US|
 |CURRENCY|The currency to use when formatting amounts|false|USD|
+|LOG_LEVEL|The log level to use. `trace`, `debug`, `info`, `warn`, `error` or `fatal`|false|`info`|

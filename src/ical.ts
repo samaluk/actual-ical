@@ -1,10 +1,11 @@
 import * as actualApi from '@actual-app/api'
 import ical from 'ical-generator'
 import { RRule } from 'rrule'
-import { DateTime } from 'luxon'
-import { BaseConditionEntity, ScheduleEntity } from '@actual-app/api/@types/loot-core/types/models'
+import { DateTime, DurationLikeObject } from 'luxon'
+import { RecurConfig, ScheduleEntity } from '@actual-app/api/@types/loot-core/types/models'
 import { formatCurrency } from './helpers/number'
 import { existsSync, mkdirSync } from 'node:fs'
+import logger from './helpers/logger'
 
 const {
   ACTUAL_SERVER,
@@ -23,12 +24,12 @@ if (!ACTUAL_SERVER || !ACTUAL_MAIN_PASSWORD || !ACTUAL_SYNC_ID) {
 // This should be fixed on Actual SDK side, but for now we can just ignore unhandled exceptions
 // This may hide other issues, but it's better than breaking the app
 process.on('uncaughtException', (error) => {
-  console.error('Unhandled exception', error)
+  logger.error('Unhandled exception', error)
 })
 
 const getSchedules = async () => {
   if (!existsSync(ACTUAL_PATH)) {
-    console.log('Creating directory:', ACTUAL_PATH)
+    logger.debug('Creating directory:', ACTUAL_PATH)
     mkdirSync(ACTUAL_PATH)
   }
 
@@ -70,26 +71,18 @@ const resolveFrequency = (frequency: string) => {
 
 export const generateIcal = async () => {
   const schedules = await getSchedules()
+  const today = DateTime.now()
+
+  logger.debug(`Found ${schedules.length} schedules`)
 
   const calendar = ical({
     name: 'Actual Balance iCal',
   })
 
   schedules.forEach((schedule) => {
-    const recurringCondition = schedule._conditions.find((condition) => {
-      return condition.field === 'date' && condition.op === 'isapprox'
-    }) as BaseConditionEntity<'date', 'isapprox'> | undefined
-
-    if (!recurringCondition) {
-      return
-    }
-
-    if (typeof recurringCondition.value === 'string') {
-      console.error('Skipping schedule with invalid recurring condition')
-      return
-    }
-
-    const recurringData = recurringCondition.value
+    logger.debug(schedule, 'Processing Schedule')
+    const recurringData = schedule._date
+    const nextDate = DateTime.fromISO(schedule.next_date)
 
     const getEndDate = () => {
       if (recurringData.endMode === 'never') {
@@ -98,11 +91,12 @@ export const generateIcal = async () => {
 
       if (recurringData.endMode === 'after_n_occurrences') {
         const windowMap = {
-          daily: 'days',
-          weekly: 'weeks',
-          monthly: 'months',
-          yearly: 'years',
-        }
+          daily: 'day',
+          weekly: 'week',
+          monthly: 'month',
+          yearly: 'year',
+        } satisfies Record<RecurConfig['frequency'], keyof DurationLikeObject>
+
         return DateTime.fromISO(recurringData.start).plus({
           [windowMap[recurringData.frequency]]: recurringData.endOccurrences,
         }).toJSDate()
@@ -115,12 +109,67 @@ export const generateIcal = async () => {
       return DateTime.fromISO(recurringData.endDate).toJSDate()
     }
 
+    const getStartDate = () => {
+      if (recurringData.endMode ===  'never') {
+        return nextDate.toJSDate()
+      }
+
+      return DateTime.fromISO(recurringData.start).toJSDate()
+    }
+
+    const getCount = () => {
+      if (recurringData.endMode ===  'never') {
+        const nextDateDiff = today.diff(nextDate, 'days').days
+
+        // nextDate is in the future
+        if (nextDateDiff < 0) {
+          if (recurringData.frequency === 'daily') {
+            return 30
+          }
+
+          if (recurringData.frequency === 'weekly') {
+            return 4
+          }
+
+          if (recurringData.frequency === 'monthly') {
+            return 12
+          }
+
+          return 2
+        }
+
+        if (recurringData.frequency === 'daily') {
+          return Math.ceil(nextDateDiff)
+        }
+
+        if (recurringData.frequency === 'weekly') {
+          return Math.ceil(nextDateDiff / 7)
+        }
+
+        if (recurringData.frequency === 'monthly') {
+          return Math.ceil(nextDateDiff / 30)
+        }
+
+        return Math.ceil(nextDateDiff / 365)
+      }
+
+      return recurringData.endOccurrences
+    }
+
+    logger.debug({
+      freq: resolveFrequency(recurringData.frequency),
+      dtstart: getStartDate(),
+      until: getEndDate(),
+      count: getCount(),
+      interval: 1,
+      tzid: TZ,
+    })
     const rule = new RRule({
       freq: resolveFrequency(recurringData.frequency),
-      count: recurringData.endOccurrences,
-      interval: 1,
-      dtstart: DateTime.fromISO(recurringData.start).toJSDate(),
+      dtstart: getStartDate(),
       until: getEndDate(),
+      count: getCount(),
+      interval: 1,
       tzid: TZ,
     })
 
@@ -130,18 +179,23 @@ export const generateIcal = async () => {
         return formatCurrency(amount)
       }
 
-      return `${formatCurrency(amount.num1)} - ${formatCurrency(amount.num2)}`
+      return `${formatCurrency(amount.num1)} ~ ${formatCurrency(amount.num2)}`
     }
 
-    return rule.all().map((date) => {
-      return calendar.createEvent({
-        start: date,
-        summary: schedule.name,
-        description: formatAmount(),
-        allDay: true,
-        timezone: TZ,
+    logger.debug(`Generating events for ${schedule.name}. ${rule.count()} events`)
+
+    return rule.all()
+      .filter((date) => {
+        return DateTime.fromJSDate(date) >= nextDate
       })
-    })
+      .map((date) => {
+        return calendar.createEvent({
+          start: date,
+          summary: `${schedule.name} (${formatAmount()})`,
+          allDay: true,
+          timezone: TZ,
+        })
+      })
   })
 
   return calendar.toString()
