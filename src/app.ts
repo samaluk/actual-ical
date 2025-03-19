@@ -14,4 +14,8 @@ app.get('/actual.ics', async (_req, res) => {
   }
 })
 
+app.get('/healthcheck', (_req, res) => {
+  res.send('OK')
+})
+
 export default app
