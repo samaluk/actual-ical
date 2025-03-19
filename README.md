@@ -2,6 +2,10 @@
 
 A simple application to expose [Actual](https://github.com/actualbudget/actual) Scheduled Transactions in iCal format.
 
+<p align="center">
+  <img src="_images/homepage_example.png" />
+</p>
+
 ## Usage
 
 Just run the docker image
