@@ -54,5 +54,5 @@ All configuration is done through environment variables.
 |TZ|The timezone to use on ical data|false|UTC|
 |PORT|The port to listen on|false|3000|
 |LOCALE|The locale to use when formatting amounts|false|en-US|
-|CURRENCY|The currency to use when formatting amounts|false|USD|
+|CURRENCY|The currency to use when formatting amounts. Values must be one of [these](https://en.wikipedia.org/wiki/ISO_4217#List_of_ISO_4217_currency_codes)|false|USD|
 |LOG_LEVEL|The log level to use. `trace`, `debug`, `info`, `warn`, `error` or `fatal`|false|`info`|
