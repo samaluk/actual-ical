@@ -163,6 +163,28 @@ export const generateIcal = async () => {
       return
     }
 
+const formatAmount = () => {
+      const amount = schedule._amount
+      if (typeof amount === 'number') {
+        return formatCurrency(amount)
+      }
+
+      return `${formatCurrency(amount.num1)} ~ ${formatCurrency(amount.num2)}`
+    }
+
+    // Handle non-recurring schedules separately
+    if (!recurringData.frequency) {
+      logger.debug(`Generating single event for ${schedule.name}`)
+      
+      return calendar.createEvent({
+        start: nextDate.toJSDate(),
+        summary: `${schedule.name} (${formatAmount()})`,
+        allDay: true,
+        timezone: TZ,
+      })
+    }
+
+    // Only create RRule for recurring schedules
     logger.debug({
       freq: resolveFrequency(recurringData.frequency),
       dtstart: getStartDate(),
@@ -179,15 +201,6 @@ export const generateIcal = async () => {
       interval: 1,
       tzid: TZ,
     })
-
-    const formatAmount = () => {
-      const amount = schedule._amount
-      if (typeof amount === 'number') {
-        return formatCurrency(amount)
-      }
-
-      return `${formatCurrency(amount.num1)} ~ ${formatCurrency(amount.num2)}`
-    }
 
     logger.debug(`Generating events for ${schedule.name}. ${rule.count()} events`)
 
