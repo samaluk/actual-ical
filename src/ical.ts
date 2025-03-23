@@ -185,22 +185,17 @@ export const generateIcal = async () => {
     }
 
     // Only create RRule for recurring schedules
-    logger.debug({
+    const ruleOptions = {
       freq: resolveFrequency(recurringData.frequency),
       dtstart: getStartDate(),
       until: getEndDate(),
       count: getCount(),
       interval: 1,
       tzid: TZ,
-    })
-    const rule = new RRule({
-      freq: resolveFrequency(recurringData.frequency),
-      dtstart: getStartDate(),
-      until: getEndDate(),
-      count: getCount(),
-      interval: 1,
-      tzid: TZ,
-    })
+    }
+
+    logger.debug(ruleOptions)
+    const rule = new RRule(ruleOptions)
 
     logger.debug(`Generating events for ${schedule.name}. ${rule.count()} events`)
 
