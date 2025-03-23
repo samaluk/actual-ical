@@ -194,7 +194,7 @@ export const generateIcal = async () => {
       tzid: TZ,
     }
 
-    logger.debug(ruleOptions)
+    logger.debug(ruleOptions, schedule.name)
     const rule = new RRule(ruleOptions)
 
     logger.debug(`Generating events for ${schedule.name}. ${rule.count()} events`)
