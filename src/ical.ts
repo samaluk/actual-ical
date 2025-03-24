@@ -78,6 +78,7 @@ export const generateIcal = async () => {
 
   const calendar = ical({
     name: 'Actual Balance iCal',
+    timezone: TZ,
   })
 
   schedules.forEach((schedule) => {
