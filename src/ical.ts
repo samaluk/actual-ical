@@ -55,7 +55,7 @@ const getSchedules = async () => {
   return data
 }
 
-const resolveFrequency = (frequency: string | undefined) => {
+const resolveFrequency = (frequency: string) => {
   switch (frequency) {
     case 'yearly':
       return RRule.YEARLY
@@ -65,8 +65,6 @@ const resolveFrequency = (frequency: string | undefined) => {
       return RRule.WEEKLY
     case 'daily':
       return RRule.DAILY
-    case undefined:
-      return undefined
     default:
       throw new Error(`Invalid frequency: ${frequency}`)
   }
@@ -175,7 +173,7 @@ export const generateIcal = async () => {
     // Handle non-recurring schedules separately
     if (!recurringData.frequency) {
       logger.debug(`Generating single event for ${schedule.name}`)
-      
+
       return calendar.createEvent({
         start: nextDate.toJSDate(),
         summary: `${schedule.name} (${formatAmount()})`,
