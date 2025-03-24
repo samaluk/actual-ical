@@ -19,7 +19,9 @@ RUN npm ci --only=production
 
 COPY --from=builder /app/dist ./dist
 
-HEALTHCHECK --interval=5s --timeout=5s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-3000}/healthcheck || exit 1
+
+EXPOSE ${PORT:-3000}
 
 CMD ["node", "dist/bin/server.js"]
