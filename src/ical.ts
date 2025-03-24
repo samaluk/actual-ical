@@ -1,5 +1,5 @@
 import * as actualApi from '@actual-app/api'
-import ical from 'ical-generator'
+import ical, { ICalCalendarMethod } from 'ical-generator'
 import { RRule } from 'rrule'
 import { DateTime, DurationLikeObject } from 'luxon'
 import { RecurConfig, ScheduleEntity } from '@actual-app/api/@types/loot-core/types/models'
@@ -80,6 +80,9 @@ export const generateIcal = async () => {
     name: 'Actual Balance iCal',
     timezone: TZ,
   })
+
+  // A method is required for outlook to display event as an invitation
+  calendar.method(ICalCalendarMethod.REQUEST)
 
   schedules.forEach((schedule) => {
     logger.debug(schedule, 'Processing Schedule')
