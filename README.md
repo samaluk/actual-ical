@@ -11,6 +11,7 @@ A simple application to expose [Actual](https://github.com/actualbudget/actual) 
 - Currency display
 - Respect schedule weekend configuration
 - Realtime updates
+- Random URL to make it harder to guess (using the Sync ID)
 
 ## Usage
 
@@ -48,6 +49,8 @@ volumes:
 
 Then you can access the iCal feed at `http://localhost:3000/actual.ics`
 
+> If `SYNC_ID_AS_URL` is set to `true`, the URL will be `http://localhost:3000/{ACTUAL_SYNC_ID}.ics`
+
 ## Configuration
 
 All configuration is done through environment variables.
@@ -57,6 +60,7 @@ All configuration is done through environment variables.
 |ACTUAL_SERVER|The server to use when connecting to the Actual API|true||
 |ACTUAL_MAIN_PASSWORD|The password to use when connecting to the Actual API|true||
 |ACTUAL_SYNC_ID|The sync ID to use when connecting to the Actual API. Find this ID in Settings > Advanced Settings > Sync ID|true||
+|SYNC_ID_AS_URL|Set to `true` to use the sync ID as part of the URL to make it safer to expose publicly, just like Google Calendar does|false||
 |ACTUAL_SYNC_PASSWORD|The sync password|false||
 |ACTUAL_PATH|The path to store Actual cache data. The container must have write access to this path.|false|`.actual-cache`|
 |TZ|The timezone to use on ical data|false|UTC|
@@ -64,3 +68,7 @@ All configuration is done through environment variables.
 |LOCALE|The locale to use when formatting amounts|false|en-US|
 |CURRENCY|The currency to use when formatting amounts. Values must be one of [these](https://en.wikipedia.org/wiki/ISO_4217#List_of_ISO_4217_currency_codes)|false|USD|
 |LOG_LEVEL|The log level to use. `trace`, `debug`, `info`, `warn`, `error` or `fatal`|false|`info`|
+
+## Hosting it publicly
+
+If you want to host this application publicly, you should use `SYNC_ID_AS_URL` to make the URL random and harder to guess.
