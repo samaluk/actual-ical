@@ -23,6 +23,10 @@ const resolvePath = () => {
 app.get(resolvePath(), async (_req, res) => {
   try {
     const iCalString = await generateIcal()
+
+    res.header('Content-Type', 'text/calendar; charset=utf-8')
+    res.header('Content-Disposition', 'attachment; filename="calendar.ics"')
+
     res.send(iCalString)
   } catch (err) {
     logger.error(err)
