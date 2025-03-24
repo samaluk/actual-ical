@@ -55,7 +55,7 @@ const getSchedules = async () => {
   return data
 }
 
-const resolveFrequency = (frequency: string) => {
+const resolveFrequency = (frequency: string | undefined) => {
   switch (frequency) {
     case 'yearly':
       return RRule.YEARLY
@@ -65,6 +65,8 @@ const resolveFrequency = (frequency: string) => {
       return RRule.WEEKLY
     case 'daily':
       return RRule.DAILY
+    case undefined:
+      return undefined
     default:
       throw new Error(`Invalid frequency: ${frequency}`)
   }
@@ -161,23 +163,6 @@ export const generateIcal = async () => {
       return
     }
 
-    logger.debug({
-      freq: resolveFrequency(recurringData.frequency),
-      dtstart: getStartDate(),
-      until: getEndDate(),
-      count: getCount(),
-      interval: 1,
-      tzid: TZ,
-    })
-    const rule = new RRule({
-      freq: resolveFrequency(recurringData.frequency),
-      dtstart: getStartDate(),
-      until: getEndDate(),
-      count: getCount(),
-      interval: 1,
-      tzid: TZ,
-    })
-
     const formatAmount = () => {
       const amount = schedule._amount
       if (typeof amount === 'number') {
@@ -186,6 +171,31 @@ export const generateIcal = async () => {
 
       return `${formatCurrency(amount.num1)} ~ ${formatCurrency(amount.num2)}`
     }
+
+    // Handle non-recurring schedules separately
+    if (!recurringData.frequency) {
+      logger.debug(`Generating single event for ${schedule.name}`)
+      
+      return calendar.createEvent({
+        start: nextDate.toJSDate(),
+        summary: `${schedule.name} (${formatAmount()})`,
+        allDay: true,
+        timezone: TZ,
+      })
+    }
+
+    // Only create RRule for recurring schedules
+    const ruleOptions = {
+      freq: resolveFrequency(recurringData.frequency),
+      dtstart: getStartDate(),
+      until: getEndDate(),
+      count: getCount(),
+      interval: 1,
+      tzid: TZ,
+    }
+
+    logger.debug(ruleOptions, schedule.name)
+    const rule = new RRule(ruleOptions)
 
     logger.debug(`Generating events for ${schedule.name}. ${rule.count()} events`)
 
