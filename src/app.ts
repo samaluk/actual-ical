@@ -9,6 +9,8 @@ const {
 
 const app = express()
 
+app.disable('x-powered-by')
+
 const resolvePath = () => {
   if (SYNC_ID_AS_URL === 'true') {
     const urlPath = `/${ACTUAL_SYNC_ID}.ics`
