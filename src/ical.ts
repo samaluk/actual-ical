@@ -78,7 +78,9 @@ export const generateIcal = async () => {
 
   const calendar = ical({
     name: 'Actual Balance iCal',
-    timezone: TZ,
+    // Homepage use an ical-date-parser, which breaks with timezone configured calendars
+    // https://github.com/zxqx/ical-date-parser/issues/3
+    // timezone: TZ,
   })
 
   // A method is required for outlook to display event as an invitation
