@@ -17,6 +17,8 @@ A simple application to expose [Actual](https://github.com/actualbudget/actual) 
 Just run the docker image
 
 ```bash
+docker volume create actual-ical
+
 docker run -d -p 3000:3000 \
   -v actual-ical:/app/.actual-cache \
   -e ACTUAL_SERVER=http://actual.example.com \
