@@ -1,0 +1,18 @@
+services:
+  actual-ical:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: actual-ical-maluk
+    ports:
+      - 9030:3000
+    environment:
+      ACTUAL_SERVER: ${ACTUAL_SERVER}
+      ACTUAL_MAIN_PASSWORD: ${ACTUAL_MAIN_PASSWORD}
+      ACTUAL_SYNC_ID: ${ACTUAL_SYNC_ID}
+      SYNC_ID_AS_URL: true
+      TZ: America/Santiago
+      LOCALE: es-CL
+      CURRENCY: CLP
+    volumes:
+      - /volume1/docker/actual-ical-maluk:/app/.actual-cache
