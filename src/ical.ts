@@ -55,7 +55,7 @@ const getSchedules = async () => {
   return data
 }
 
-const resolveFrequency = (frequency: string) => {
+const resolveFrequency = (frequency: string | undefined) => {
   switch (frequency) {
     case 'yearly':
       return RRule.YEARLY
@@ -65,6 +65,8 @@ const resolveFrequency = (frequency: string) => {
       return RRule.WEEKLY
     case 'daily':
       return RRule.DAILY
+    case undefined:
+      return undefined
     default:
       throw new Error(`Invalid frequency: ${frequency}`)
   }
