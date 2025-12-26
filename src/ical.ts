@@ -37,6 +37,7 @@ const getSchedules = async () => {
     dataDir: ACTUAL_PATH,
     serverURL: ACTUAL_SERVER,
     password: ACTUAL_MAIN_PASSWORD,
+    verbose: false,
   })
 
   await actualApi.downloadBudget(ACTUAL_SYNC_ID, {
@@ -50,7 +51,8 @@ const getSchedules = async () => {
     })
     .select(['*'])
 
-  const { data } = await actualApi.runQuery(query) as { data: ScheduleEntity[] }
+  // @ts-expect-error
+  const { data } = await actualApi.aqlQuery(query) as { data: ScheduleEntity[] }
 
   return data
 }
@@ -90,6 +92,11 @@ export const generateIcal = async () => {
     logger.debug(schedule, 'Processing Schedule')
     const recurringData = schedule._date
     const nextDate = DateTime.fromISO(schedule.next_date)
+
+    if (typeof recurringData === 'string') {
+      logger.debug({ recurringData }, `Skipping non-recurring schedule with string date: ${schedule.name}`)
+      return
+    }
 
     const getEndDate = () => {
       if (recurringData.endMode === 'never') {
