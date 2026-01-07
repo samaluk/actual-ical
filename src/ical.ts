@@ -51,7 +51,6 @@ const getSchedules = async () => {
     })
     .select(['*'])
 
-  // @ts-expect-error
   const { data } = await actualApi.aqlQuery(query) as { data: ScheduleEntity[] }
 
   return data
