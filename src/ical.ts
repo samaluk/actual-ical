@@ -201,7 +201,7 @@ export const generateIcal = async () => {
       dtstart: getStartDate(),
       until: getEndDate(),
       count: getCount(),
-      interval: 1,
+      interval: recurringData.interval || 1,
       tzid: TZ,
     }
 
